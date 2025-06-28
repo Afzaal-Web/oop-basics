@@ -25,6 +25,7 @@ class Book {
     }
     toggleReadStatus() {
         this.isRead = !this.isRead;
+        library.saveToLocalStorage(); 
     }
 }
 
@@ -34,10 +35,14 @@ class Library {
     }
     addBook(book) {
         this.books.push(book);
+        this.saveToLocalStorage();
     }
     removeBook(id) {
         const index = this.books.findIndex((book) => book.id === id);
-        if (index !== -1) this.books.splice(index, 1);
+        if (index !== -1) {
+            this.books.splice(index, 1);
+            this.saveToLocalStorage();
+        }
     }
     listBooks() {
         libraryDisplay.innerHTML = '';
@@ -59,9 +64,22 @@ class Library {
         author.value = '';
         attachEventHandlers();
     }
+    saveToLocalStorage() {
+        localStorage.setItem("myLibrary", JSON.stringify(this.books));
+    }
 }
 
 const library = new Library();
+
+const savedBooks = JSON.parse(localStorage.getItem("myLibrary"));
+if(savedBooks){
+    savedBooks.forEach((data) => {
+  const book = new Book(data.title, data.author);
+    book.id = data.id;
+    book.isRead = data.isRead;
+    library.addBook(book);
+    })
+}
 library.listBooks();
 
 getForm.addEventListener('submit', () => {
